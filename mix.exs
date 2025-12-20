@@ -3,11 +3,13 @@ defmodule Airports.MixProject do
 
   def project do
     [
-      app: :airports,
-      version: "0.1.0",
-      elixir: "~> 1.19",
+      app:             :airports,
+      name:            "Airports",
+      version:         "0.0.1",
+      escript:         escript_config(),
+      elixir:          "~> 1.19",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps:            deps()
     ]
   end
 
@@ -22,7 +24,12 @@ defmodule Airports.MixProject do
   defp deps do
     [
       { :req, "~> 0.5.16" },
-      # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
     ]
   end
+  defp escript_config do
+    [
+      main_module: Airports.CLI
+    ]
+  end
+
 end
