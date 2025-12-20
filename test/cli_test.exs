@@ -25,8 +25,8 @@ defmodule Airports.CLITest do
                {:ok, ["K6B9", "EGLL", "KJFK"]}
     end
 
-    test "returns error when no arguments are given" do
-      assert CLI.parse_argv([]) == {:error, :invalid_arguments}
+    test "returns :help when no arguments are given" do
+      assert CLI.parse_argv([]) == :help 
     end
   end
 end
