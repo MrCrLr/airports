@@ -1,21 +1,35 @@
 # Airports
 
-**TODO: Add description**
+A small Elixir CLI that fetches and displays current weather observations for one or more airports using NOAA’s public XML feeds.
 
-## Installation
+This project focuses on:
+- clean CLI argument parsing
+- explicit domain modeling with structs
+- clear separation between fetch, parse, and render layers
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `airports` to your list of dependencies in `mix.exs`:
+## Usage
 
-```elixir
-def deps do
-  [
-    {:airports, "~> 0.1.0"}
-  ]
-end
+Run the CLI with one or more ICAO airport codes:
+
+```bash
+mix run -e 'Airports.CLI.run(["PAMR", "KJFK"])'
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/airports>.
+Example output includes location, observation time, weather, temperature, wind, and visibility.
+
+## Architecture (high level)
+
+```
+CLI → Fetch (HTTP) → Parse (XML) → Forecast struct → Render
+```
+
+- **Fetch**: Retrieves raw XML from NOAA
+- **Parser**: Converts XML into a `%Forecast{}` domain struct
+- **CLI / Renderer**: Renders forecasts for terminal output
+
+## Notes
+
+- Written as a learning project inspired by *Programming Elixir* (PragProg)
+- Uses Erlang’s `:xmerl` for XML parsing
+- Designed to be extended (tables, JSON output, concurrency, escript)
 
