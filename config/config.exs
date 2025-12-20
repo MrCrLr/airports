@@ -1,6 +1,7 @@
 import Config
 
 config :airports,
+  index_url: "https://preview-forecast.weather.gov/xml/index.xml" 
   noaa_url: "https://preview-forecast.weather.gov/xml/current_obs"
 
 config :logger,
