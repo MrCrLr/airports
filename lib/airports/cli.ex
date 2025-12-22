@@ -13,6 +13,10 @@ defmodule Airports.CLI do
       {:ok, airports} ->
         App.run(airports)
         System.halt(0)
+
+      {:stations, :list} ->
+        App.run({:stations, :list})
+        System.halt(0)
     end
   end
 
@@ -52,11 +56,17 @@ defmodule Airports.CLI do
     end
   end
 
-  defp args_to_internal_representation([]), 
-    do: :help
+  defp args_to_internal_representation(["stations", "list"]) do
+    {:stations, :list}
+  end
 
-  defp args_to_internal_representation(codes), 
-    do: {:ok, Enum.map(codes, &String.upcase/1)}
+  defp args_to_internal_representation([]) do 
+    :help
+  end
+
+  defp args_to_internal_representation(codes) do
+    {:ok, Enum.map(codes, &String.upcase/1)}
+  end
 
 end
 

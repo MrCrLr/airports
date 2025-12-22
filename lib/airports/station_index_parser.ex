@@ -68,10 +68,18 @@ defmodule Airports.StationIndexParser do
     end
   end
 
+  defp parse_float(value) when is_binary(value) do
+    case Float.parse(value) do
+      {float, _} -> float
+      :error -> nil
+    end
+  end
+
   defp opt_float_at(node, xpath) do
-    case opt_text_at(node, xpath) do
-      nil   -> nil
-      value -> String.to_float(value)
+    with {:ok, value} <- text_at(node, xpath) do
+      parse_float(value)
+    else
+      _ -> nil
     end
   end
 end
