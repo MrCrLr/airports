@@ -1,9 +1,9 @@
-defmodule Airports.ForecastParser do
+defmodule Airports.Forecasts.Parser do
   @moduledoc """
   Parses NOAA current observation XML into a forecast map.
   """
 
-  alias Airports.Forecast
+  alias Airports.Forecasts.Forecast
 
   def parse(xml) when is_binary(xml) do
     {doc, _} = 

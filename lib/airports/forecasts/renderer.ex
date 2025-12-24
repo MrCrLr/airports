@@ -1,6 +1,6 @@
-defmodule Airports.Renderer do
+defmodule Airports.Forecasts.Renderer do
 
-  alias Airports.Forecast
+  alias Airports.Forecasts.Forecast
 
   def render(results) when is_list(results) do
     Enum.each(results, &render_result/1)

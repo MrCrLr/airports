@@ -1,4 +1,4 @@
-defmodule Airports.StationIndex do
+defmodule Airports.Stations.Index do
 
   @index_url Application.compile_env!(:airports, :index_url)
 

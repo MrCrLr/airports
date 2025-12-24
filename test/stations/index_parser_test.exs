@@ -1,8 +1,8 @@
-defmodule Airports.StationIndexParserTest do
+defmodule Airports.Stations.IndexParserTest do
   use ExUnit.Case, async: true
 
-  alias Airports.StationIndexParser
-  alias Airports.Station
+  alias Airports.Stations.IndexParser
+  alias Airports.Stations.Station
 
   @valid_xml """
   <wx_station_index>
@@ -20,7 +20,7 @@ defmodule Airports.StationIndexParserTest do
   """
 
   test "parses station index into Station structs" do
-    assert {:ok, [station]} = StationIndexParser.parse(@valid_xml)
+    assert {:ok, [station]} = IndexParser.parse(@valid_xml)
 
     assert %Station{} = station
     assert station.id == "CYYC"
@@ -42,7 +42,7 @@ defmodule Airports.StationIndexParserTest do
 
   test "stations missing required fields are dropped" do
     assert {:ok, stations} =
-             StationIndexParser.parse(@missing_required_field_xml)
+             IndexParser.parse(@missing_required_field_xml)
 
     assert stations == []
   end
@@ -63,7 +63,7 @@ defmodule Airports.StationIndexParserTest do
 
   test "valid stations are returned even when others are invalid" do
     assert {:ok, [station]} =
-             StationIndexParser.parse(@mixed_xml)
+             IndexParser.parse(@mixed_xml)
 
     assert station.id == "CYYC"
   end
@@ -80,7 +80,7 @@ defmodule Airports.StationIndexParserTest do
 
   test "missing optional fields do not fail parsing" do
     assert {:ok, [station]} =
-             StationIndexParser.parse(@missing_optional_fields_xml)
+             IndexParser.parse(@missing_optional_fields_xml)
 
     assert station.latitude == nil
     assert station.longitude == nil

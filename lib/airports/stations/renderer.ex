@@ -1,5 +1,6 @@
-defmodule Airports.StationRenderer do
-  alias Airports.Station
+defmodule Airports.Stations.Renderer do
+
+  alias Airports.Stations.Station
 
   def render([]) do
     IO.puts("No stations found.")

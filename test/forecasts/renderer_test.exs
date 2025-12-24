@@ -1,9 +1,9 @@
-defmodule Airports.RendererTest do
+defmodule Airports.Forecasts.RendererTest do
   use ExUnit.Case
   import ExUnit.CaptureIO
 
-  alias Airports.Forecast
-  alias Airports.Renderer
+  alias Airports.Forecasts.Forecast
+  alias Airports.Forecasts.Renderer
 
   test "renders a forecast" do
     forecast =

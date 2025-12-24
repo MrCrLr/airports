@@ -1,14 +1,14 @@
-defmodule Airports.StationRendererTest do
+defmodule Airports.Stations.RendererTest do
   use ExUnit.Case, async: true
 
-  alias Airports.Station
-  alias Airports.StationRenderer
+  alias Airports.Stations.Station
+  alias Airports.Stations.Renderer
 
   test "renders stations without crashing" do
     stations = [
       %Station{id: "CYYC", name: "Calgary", state: "AB"}
     ]
 
-    assert :ok = StationRenderer.render(stations)
+    assert :ok = Renderer.render(stations)
   end
 end

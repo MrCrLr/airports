@@ -1,8 +1,8 @@
-defmodule Airports.ForecastParserTest do
+defmodule Airports.Forecasts.ParserTest do
   use ExUnit.Case, async: true
 
-  alias Airports.Forecast
-  alias Airports.ForecastParser
+  alias Airports.Forecasts.Forecast
+  alias Airports.Forecasts.Parser
 
   defp valid_xml do
     """
@@ -35,7 +35,7 @@ defmodule Airports.ForecastParserTest do
 
   test "parses a valid forecast into a Forecast struct" do
     assert {:ok, %Forecast{} = forecast} =
-             ForecastParser.parse(valid_xml())
+             Parser.parse(valid_xml())
 
     assert forecast.station_id == "K6B9"
     assert forecast.location
@@ -47,12 +47,12 @@ defmodule Airports.ForecastParserTest do
   test "fails when location is missing" do
     xml = xml_without_location()
     assert {:error, {:missing_field, _}} =
-             ForecastParser.parse(xml)
+             Parser.parse(xml)
   end
 
   test "missing optional fields do not fail parsing" do
     xml = xml_without_optional_fields()
-    assert {:ok, forecast} = ForecastParser.parse(xml)
+    assert {:ok, forecast} = Parser.parse(xml)
     assert forecast.visibility_mi == nil
   end
 

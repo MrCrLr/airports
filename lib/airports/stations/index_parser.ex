@@ -1,9 +1,9 @@
-defmodule Airports.StationIndexParser do
+defmodule Airports.Stations.IndexParser do
   @moduledoc """
   Parses the NOAA station index XML into a list of Station structs.
   """
   
-  alias Airports.Station
+  alias Airports.Stations.Station
 
   def parse(xml) when is_binary(xml) do
     {doc, _} =

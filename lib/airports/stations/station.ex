@@ -1,4 +1,5 @@
-defmodule Airports.Station do
+defmodule Airports.Stations.Station do
+
   @moduledoc """
   Domain struct representing a single parsed station from 
   the list of all NOAA airport weather station readings.

@@ -1,25 +1,25 @@
 defmodule Airports.App do
 
-  alias Airports.{Forecasts, ForecastParser, Renderer, Forecast}
-  alias Airports.{StationIndex, StationIndexParser, StationRenderer}
+  alias Airports.Forecasts
+  alias Airports.Stations
 
   def run(airports) when is_list(airports) do
     airports
-    |> Forecasts.fetch()
+    |> Forecasts.Forecasts.fetch()
     |> Enum.map(&parse_forecast/1)
-    |> Renderer.render()
+    |> Forecasts.Renderer.render()
   end
 
   def run({:stations, :list}) do
-    with {:ok, xml} <- StationIndex.fetch(),
-         {:ok, stations} <- StationIndexParser.parse(xml) do
-      StationRenderer.render(stations)
+    with {:ok, xml} <- Stations.Index.fetch(),
+         {:ok, stations} <- Stations.IndexParser.parse(xml) do
+      Stations.Renderer.render(stations)
     end
   end
 
   defp parse_forecast({:ok, %{airport: airport, body: xml}}) do
-    case ForecastParser.parse(xml) do
-      {:ok, %Forecast{} = forecast} ->
+    case Forecasts.Parser.parse(xml) do
+      {:ok, %Forecasts.Forecast{} = forecast} ->
         {:ok, forecast}
 
       {:error, reason} ->

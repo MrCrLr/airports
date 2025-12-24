@@ -1,4 +1,4 @@
-defmodule Airports.Forecasts do
+defmodule Airports.Forecasts.Forecasts do
 
   @noaa_url Application.compile_env!(:airports, :noaa_url)
 

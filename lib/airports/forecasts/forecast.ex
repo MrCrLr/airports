@@ -1,4 +1,4 @@
-defmodule Airports.Forecast do
+defmodule Airports.Forecasts.Forecast do
   @moduledoc """
   Domain struct representing a parsed NOAA current observation.
   """
