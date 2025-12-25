@@ -40,9 +40,9 @@ defmodule Airports.CLI do
   Parses command-line arguments.
 
   Returns:
-    * :help when -h or --help is passed
-    * {:ok, [airport_code, ...]} for one more ICAO codes
-    * {:error, :invlaid_arguments} otherwise
+    * `:help` when `-h` or `--help` is passed
+    * `{:ok, [airport_code, ...]}` for one more ICAO codes
+    * `{:error, :invalid_arguments}` otherwise
   """
 
   def parse_argv(argv) do
