@@ -2,7 +2,8 @@ defmodule Airports.Stations.IndexParser do
   @moduledoc """
   Parses the NOAA station index XML into a list of Station structs.
   """
-  
+  require Logger  
+ 
   alias Airports.Stations.Station
 
   def parse(xml) when is_binary(xml) do
@@ -25,8 +26,7 @@ defmodule Airports.Stations.IndexParser do
     with {:ok, id   } <- id(station_node),
          {:ok, name } <- name(station_node),
          {:ok, state} <- state(station_node) do
-      {:ok,
-       %Station{
+      {:ok, %Station{
          id:        id,
          name:      name,
          state:     state,
@@ -36,6 +36,10 @@ defmodule Airports.Stations.IndexParser do
          html_url:  opt_text_at(station_node, ~c"./html_url/text()"),
          rss_url:   opt_text_at(station_node, ~c"./rss_url/text()")
        }}
+    else
+      {:error, {:missing_field, field}} ->
+         Logger.debug(fn -> "Skipping station missing required field #{inspect(field)}" end)
+         {:error, :invalid_station}
     end
   end
 

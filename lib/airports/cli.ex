@@ -1,20 +1,26 @@
 defmodule Airports.CLI do
+  require Logger
 
   alias Airports.App
 
   def main(argv), do: run(argv)
 
   def run(argv) do
+    Logger.debug(fn -> "CLI argv: #{inspect(argv)}" end)
+
     case parse_argv(argv) do
       :help ->
+        Logger.debug(fn -> "CLI help requested" end)
         print_help()
         System.halt(0)
 
       {:ok, airports} ->
+        Logger.debug(fn -> "Running with airports: #{inspect(airports)}" end)
         App.run(airports)
         System.halt(0)
 
       {:stations, :list} ->
+        Logger.debug(fn -> "CLI listing stations" end)
         App.run({:stations, :list})
         System.halt(0)
     end

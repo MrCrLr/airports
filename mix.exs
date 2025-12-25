@@ -5,8 +5,8 @@ defmodule Airports.MixProject do
   def project do
     [
       app:             :airports,
-      name:            "Airports",
       version:         "0.0.1",
+      name:            "Airports",
       escript:         escript_config(),
       elixir:          "~> 1.19",
       start_permanent: Mix.env() == :prod,
@@ -24,9 +24,12 @@ defmodule Airports.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      { :req, "~> 0.5.16" },
+      { :req,     "~> 0.5.16" },
+      { :ex_doc,  "~> 0.34"   },
+      { :earmark, "~> 1.4.47" }
     ]
   end
+
   defp escript_config do
     [
       main_module: Airports.CLI
