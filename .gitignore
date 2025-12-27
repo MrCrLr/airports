@@ -13,6 +13,7 @@ airports
 
 # Temporary files, for example, from tests.
 /tmp/
+.DS_Store
 
 # If the VM crashes, it generates a dump, let's ignore it too.
 erl_crash.dump

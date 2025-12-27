@@ -2,6 +2,15 @@ defmodule Airports.Stations.Index do
 
   @index_url Application.compile_env!(:airports, :index_url)
 
+  alias Airports.Stations.IndexParser
+
+  def all do
+    with {:ok, xml} <- fetch(),
+         {:ok, stations} <- IndexParser.parse(xml) do
+      stations
+    end
+  end
+
   def fetch do
     case Req.get(@index_url) do
       {:ok, %{status: 200, body: body}} ->
