@@ -7,10 +7,13 @@ defmodule Airports.Stations.Renderer do
     :ok
   end
 
-  def render(stations) when is_list(stations) do
-    stations
-    |> Enum.each(&render_station/1)
+  def render([%Station{} | _] = stations) do
+    Enum.each(stations, &render_station/1)
+    :ok
+  end
 
+  def render([{line, idx} | _] = items) when is_binary(line) and is_integer(idx) do
+    Enum.each(items, &render_station/1)
     :ok
   end
 
@@ -22,8 +25,11 @@ defmodule Airports.Stations.Renderer do
     """)
   end
 
+  defp render_station({line, idx}) when is_binary(line) and is_integer(idx) do
+    IO.puts("#{idx}. #{line}")
+  end
+
   defp format_coords(%Station{latitude: nil, longitude: nil}), do: "unknown"
   defp format_coords(%Station{latitude: lat, longitude: lon}), do: "#{lat}, #{lon}"
 
 end
-

@@ -26,14 +26,25 @@ defmodule Airports.App do
   def run({:stations, {:search, query, opts}}) do
     Logger.info("Running station search")
 
-    case Airports.Stations.Search.search(query, opts) do
-      {:ok, results} ->
-        Airports.Stations.Renderer.render(results)
-
+    with {:ok, ranked} <- Stations.Search.search(query, opts),
+        {:ok, picked} <- Stations.Selection.choose(ranked),
+        {:ok, station} <- normalize_station(picked) do
+      Stations.Renderer.render([station])
+    else
       {:error, :no_match} ->
         IO.puts("No matching stations found.")
+
+      {:error, :no_results} ->
+        IO.puts("No matching stations found.")
+
+      {:error, reason} ->
+        Logger.error("Station search failed: #{inspect(reason)}")
     end
   end
+
+  defp normalize_station({%Stations.Station{} = station, _distance}), do: {:ok, station}
+  defp normalize_station(%Stations.Station{} = station), do: {:ok, station}
+  defp normalize_station(other), do: {:error, {:unexpected_selection, other}}
 
   defp parse_forecast({:ok, %{airport: airport, body: xml}}) do
     case Forecasts.Parser.parse(xml) do
