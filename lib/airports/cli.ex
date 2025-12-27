@@ -1,4 +1,21 @@
 defmodule Airports.CLI do
+  @moduledoc """
+  Command-line interface for the Airports application.
+
+  This module is responsible for:
+    * Parsing command-line arguments
+    * Mapping user input into internal command representations
+    * Dispatching execution to `Airports.App`
+
+  The CLI supports two primary workflows:
+
+    1. Fetching current weather observations for one or more airport ICAO codes
+    2. Searching the NOAA station index using fuzzy name matching and geographic proximity
+
+  All domain logic (searching, parsing, rendering) is delegated to lower layers.
+  This module acts strictly as a boundary between user input and application logic.
+  """
+
   require Logger
 
   alias Airports.App
@@ -23,31 +40,97 @@ defmodule Airports.CLI do
         Logger.debug(fn -> "CLI listing stations" end)
         App.run({:stations, :list})
         System.halt(0)
+
+      {:stations, {:search, query, opts}} ->
+        Logger.debug(fn -> "CLI searching stations: #{query}, #{inspect(opts)}" end)
+        App.run({:stations, {:search, query, opts}})
+        System.halt(0)
     end
   end
 
-  defp print_help() do
-    IO.puts("""
-    Usage: 
-      airports <airport_code> [ <more_airport_codes> ]
+  defp print_help, do: IO.puts(help_text())
 
-    Example:
-      airports PAMR KJFK
-    """)
+  defp help_text do
+    """
+    airports — query airport weather stations from NOAA
+
+    USAGE
+      airports <ICAO_CODE> [<MORE_CODES>...]
+
+      airports stations search <QUERY> [options]
+      airports stations list
+
+    DESCRIPTION
+      Fetches and displays current weather observations for airports,
+      or helps you search for nearby weather stations by name or location.
+
+    COMMANDS
+      <ICAO_CODE> [<MORE_CODES>...]
+          Fetch current observations for one or more airport ICAO codes.
+
+          Example:
+            airports PAMR KJFK
+
+      stations search <QUERY>
+          Search for a station by name (fuzzy matching supported),
+          then return nearby stations sorted by distance.
+
+          Examples:
+            airports stations search Boston
+            airports stations search Bostn
+            airports stations search Boston --radius 50
+
+          Options:
+            --radius, -r <km>    Search radius in kilometers (default: 50)
+
+      stations list
+          List all available weather stations (advanced / debugging).
+
+    OPTIONS
+      -h, --help
+          Show this help message.
+    """
   end
 
   @doc """
-  Parses command-line arguments.
+  Parses raw command-line arguments into an internal command representation.
 
-  Returns:
-    * `:help` when `-h` or `--help` is passed
-    * `{:ok, [airport_code, ...]}` for one more ICAO codes
-    * `{:error, :invalid_arguments}` otherwise
+  This function interprets user input and returns a normalized structure
+  that can be consumed by `Airports.App.run/1`.
+
+  This function does not execute any commands.
+
+  ## Returns
+
+    * `:help`
+      When `-h` or `--help` is provided, or when no arguments are given.
+
+    * `{:ok, [icao_code, ...]}`
+      When one or more airport ICAO codes are provided.
+      Codes are normalized to uppercase.
+
+      Example:
+          ["pamr", "kjfk"] -> {:ok, ["PAMR", "KJFK"]}
+
+    * `{:stations, :list}`
+      When the user requests a full station listing.
+
+      Example:
+          ["stations", "list"]
+
+    * `{:stations, {:search, query, opts}}`
+      When the user performs a station search.
+
+      Example:
+          ["stations", "search", "Boston", "--radius", "50"]
+
+    * `{:error, :invalid_arguments}`
+      When the arguments cannot be interpreted as a valid command.
   """
 
   def parse_argv(argv) do
     OptionParser.parse(
-      argv, 
+      argv,
       switches: [help: :boolean],
       aliases:  [h:    :help]
     )
@@ -66,7 +149,11 @@ defmodule Airports.CLI do
     {:stations, :list}
   end
 
-  defp args_to_internal_representation([]) do 
+  defp args_to_internal_representation(["stations", "search" | rest]) do
+    parse_station_search(rest)
+  end
+
+  defp args_to_internal_representation([]) do
     :help
   end
 
@@ -74,5 +161,23 @@ defmodule Airports.CLI do
     {:ok, Enum.map(codes, &String.upcase/1)}
   end
 
-end
+  defp parse_station_search([]), do: :help
+  defp parse_station_search([query | flags]) do
+    {opts, _, _} =
+      OptionParser.parse(
+        flags,
+        switches: [radius: :integer],
+        aliases: [r: :radius]
+      )
+    {:stations, {:search, query, normalize_search_opts(opts)}}
+  end
 
+  defp normalize_search_opts(opts) do
+    opts
+    |> Enum.map(fn
+      {:radius, r} -> {:radius_km, r}
+      other -> other
+    end)
+  end
+
+end

@@ -23,6 +23,18 @@ defmodule Airports.App do
     end
   end
 
+  def run({:stations, {:search, query, opts}}) do
+    Logger.info("Running station search")
+
+    case Airports.Stations.Search.search(query, opts) do
+      {:ok, results} ->
+        Airports.Stations.Renderer.render(results)
+
+      {:error, :no_match} ->
+        IO.puts("No matching stations found.")
+    end
+  end
+
   defp parse_forecast({:ok, %{airport: airport, body: xml}}) do
     case Forecasts.Parser.parse(xml) do
       {:ok, %Forecasts.Forecast{} = forecast} ->
