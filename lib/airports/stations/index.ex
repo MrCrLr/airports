@@ -7,7 +7,7 @@ defmodule Airports.Stations.Index do
   def all do
     with {:ok, xml} <- fetch(),
          {:ok, stations} <- IndexParser.parse(xml) do
-      stations
+      {:ok, stations}
     end
   end
 

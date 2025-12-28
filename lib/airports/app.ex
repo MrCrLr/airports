@@ -3,6 +3,7 @@ defmodule Airports.App do
 
   alias Airports.Forecasts
   alias Airports.Stations
+  alias Airports.Cities
 
   def run(airports) when is_list(airports) do
     Logger.info("Fetching forecasts for #{length(airports)} airports")
@@ -26,19 +27,18 @@ defmodule Airports.App do
   def run({:stations, {:search, query, opts}}) do
     Logger.info("Running station search")
 
-    with {:ok, ranked} <- Stations.Search.search(query, opts),
-        {:ok, picked} <- Stations.Selection.choose(ranked),
-        {:ok, station} <- normalize_station(picked) do
+    with cities when cities != [] 
+         <- Cities.Search.search_candidates(query, min_population: 500),
+         {:ok, city}     <- Cities.Selector.choose(cities),
+         {:ok, ranked}   <- Stations.Search.within_radius(city, opts),
+         {:ok, picked}   <- Stations.Selection.choose(ranked),
+         {:ok, station}  <- normalize_station(picked) do
       Stations.Renderer.render([station])
     else
-      {:error, :no_match} ->
-        IO.puts("No matching stations found.")
-
-      {:error, :no_results} ->
-        IO.puts("No matching stations found.")
-
+      [] -> IO.puts("No matching cities found.")
+      {:error, :cancelled} -> :ok
       {:error, reason} ->
-        Logger.error("Station search failed: #{inspect(reason)}")
+        Logger.error("Search failed: #{inspect(reason)}")
     end
   end
 
