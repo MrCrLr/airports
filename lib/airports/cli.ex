@@ -19,8 +19,6 @@ defmodule Airports.CLI do
   require Logger
   alias Airports.App
 
-  @default_radius_km 50
-
   def main(argv), do: run(argv)
 
   def run(argv) do
@@ -74,43 +72,37 @@ defmodule Airports.CLI do
       When the user requests a full station listing.
 
       Example:
-          ["stations", "list"]
+          ["list"]
 
     * `{:stations, {:search, query, opts}}`
       When the user performs a station search.
 
       Example:
-          ["stations", "search", "Boston", "--radius", "50"]
+          ["search", "Boston", "--radius", "50"]
 
     * `{:error, :invalid_arguments}`
       When the arguments cannot be interpreted as a valid command.
   """
 
-  def parse_argv(argv) when argv == [] do
-    :help
-  end
+  def parse_argv([]), do: :help
 
   def parse_argv(argv) when is_list(argv) do
     if Enum.member?(argv, "-h") or Enum.member?(argv, "--help") do
       :help
     else
-      _parse_argv(argv)
+      do_parse(argv)
     end
   end
 
-  def _parse_argv(["stations"]) do
-    :help
-  end
-
-  def _parse_argv(["stations", "list"]) do
+  def do_parse(["list"]) do 
     {:stations, :list}
   end
 
-  def _parse_argv(["stations", "search" | rest]) do
+  def do_parse(["search" | rest]) do 
     parse_station_search(rest)
   end
 
-  def _parse_argv(codes) when is_list(codes) do
+  def do_parse(codes) do
     {:ok, Enum.map(codes, &String.upcase/1)}
   end
 
@@ -130,11 +122,13 @@ defmodule Airports.CLI do
 
       true ->
         query = Enum.join(rest, " ")
+
         normalize_radius_opts(opts)
         |> case do
           {:ok, norm_opts} -> {:stations, {:search, query, norm_opts}}
           {:error, msg} -> {:error, msg}
         end
+
     end
   end
 
@@ -160,8 +154,8 @@ defmodule Airports.CLI do
     USAGE
       airports <ICAO_CODE> [<MORE_CODES>...]
 
-      airports stations search <QUERY> [options]
-      airports stations list
+      airports search <QUERY> [options]
+      airports list
 
     DESCRIPTION
       Fetches and displays current weather observations for NOAA weather stations,
@@ -174,19 +168,19 @@ defmodule Airports.CLI do
           Example:
             airports PAMR KJFK
 
-      stations search <QUERY>
+      search <QUERY>
           Search for a station by name (fuzzy matching supported),
           then return nearby stations sorted by distance.
 
           Examples:
-            airports stations search Boston
-            airports stations search Bostn
-            airports stations search Boston --radius 50
+            airports search Boston
+            airports search Bostn
+            airports search Boston --radius 50
 
           Options:
             --radius, -r <km>    Search radius in kilometers (default: 50)
 
-      stations list
+      list
           List all available weather stations (advanced / debugging).
 
     OPTIONS
