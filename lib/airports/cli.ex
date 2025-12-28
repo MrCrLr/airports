@@ -164,7 +164,7 @@ defmodule Airports.CLI do
       airports stations list
 
     DESCRIPTION
-      Fetches and displays current weather observations for airports,
+      Fetches and displays current weather observations for NOAA weather stations,
       or helps you search for nearby weather stations by name or location.
 
     COMMANDS
