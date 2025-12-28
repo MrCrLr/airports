@@ -17,8 +17,9 @@ defmodule Airports.CLI do
   """
 
   require Logger
-
   alias Airports.App
+
+  @default_radius_km 50
 
   def main(argv), do: run(argv)
 
@@ -27,24 +28,126 @@ defmodule Airports.CLI do
 
     case parse_argv(argv) do
       :help ->
-        Logger.debug(fn -> "CLI help requested" end)
         print_help()
         System.halt(0)
 
       {:ok, airports} ->
-        Logger.debug(fn -> "Running with airports: #{inspect(airports)}" end)
         App.run(airports)
         System.halt(0)
 
       {:stations, :list} ->
-        Logger.debug(fn -> "CLI listing stations" end)
         App.run({:stations, :list})
         System.halt(0)
 
       {:stations, {:search, query, opts}} ->
-        Logger.debug(fn -> "CLI searching stations: #{query}, #{inspect(opts)}" end)
         App.run({:stations, {:search, query, opts}})
         System.halt(0)
+
+      {:error, msg} ->
+        IO.puts(:stderr, "Error: #{msg}")
+        IO.puts(:stderr, "\n" <> help_text())
+        System.halt(1)
+    end
+  end
+
+  @doc """
+  Parses raw command-line arguments into an internal command representation.
+
+  This function interprets user input and returns a normalized structure
+  that can be consumed by `Airports.App.run/1`.
+
+  This function does not execute any commands.
+
+  ## Returns
+
+    * `:help`
+      When `-h` or `--help` is provided, or when no arguments are given.
+
+    * `{:ok, [icao_code, ...]}`
+      When one or more airport ICAO codes are provided.
+      Codes are normalized to uppercase.
+
+      Example:
+          ["pamr", "kjfk"] -> {:ok, ["PAMR", "KJFK"]}
+
+    * `{:stations, :list}`
+      When the user requests a full station listing.
+
+      Example:
+          ["stations", "list"]
+
+    * `{:stations, {:search, query, opts}}`
+      When the user performs a station search.
+
+      Example:
+          ["stations", "search", "Boston", "--radius", "50"]
+
+    * `{:error, :invalid_arguments}`
+      When the arguments cannot be interpreted as a valid command.
+  """
+
+  def parse_argv(argv) when argv == [] do
+    :help
+  end
+
+  def parse_argv(argv) when is_list(argv) do
+    if Enum.member?(argv, "-h") or Enum.member?(argv, "--help") do
+      :help
+    else
+      _parse_argv(argv)
+    end
+  end
+
+  def _parse_argv(["stations"]) do
+    :help
+  end
+
+  def _parse_argv(["stations", "list"]) do
+    {:stations, :list}
+  end
+
+  def _parse_argv(["stations", "search" | rest]) do
+    parse_station_search(rest)
+  end
+
+  def _parse_argv(codes) when is_list(codes) do
+    {:ok, Enum.map(codes, &String.upcase/1)}
+  end
+
+  defp parse_station_search(args) do
+    {opts, rest, invalid} =
+      OptionParser.parse(args,
+        switches: [radius: :integer],
+        aliases: [r: :radius]
+      )
+
+    cond do
+      invalid != [] ->
+        {:error, "invalid option(s): #{inspect(invalid)}"}
+
+      rest == [] ->
+        :help
+
+      true ->
+        query = Enum.join(rest, " ")
+        normalize_radius_opts(opts)
+        |> case do
+          {:ok, norm_opts} -> {:stations, {:search, query, norm_opts}}
+          {:error, msg} -> {:error, msg}
+        end
+    end
+  end
+
+  defp normalize_radius_opts(opts) do
+    case Keyword.fetch(opts, :radius) do
+      :error ->
+        {:ok, []}  # Proximity module applies default @default_radius_km
+
+      {:ok, r} when is_integer(r) and r > 0 ->
+        {:ok, [radius_km: r]}
+
+      {:ok, r} ->
+        {:error, "radius must be a positive integer (got #{inspect(r)})"}
     end
   end
 
@@ -92,92 +195,5 @@ defmodule Airports.CLI do
     """
   end
 
-  @doc """
-  Parses raw command-line arguments into an internal command representation.
-
-  This function interprets user input and returns a normalized structure
-  that can be consumed by `Airports.App.run/1`.
-
-  This function does not execute any commands.
-
-  ## Returns
-
-    * `:help`
-      When `-h` or `--help` is provided, or when no arguments are given.
-
-    * `{:ok, [icao_code, ...]}`
-      When one or more airport ICAO codes are provided.
-      Codes are normalized to uppercase.
-
-      Example:
-          ["pamr", "kjfk"] -> {:ok, ["PAMR", "KJFK"]}
-
-    * `{:stations, :list}`
-      When the user requests a full station listing.
-
-      Example:
-          ["stations", "list"]
-
-    * `{:stations, {:search, query, opts}}`
-      When the user performs a station search.
-
-      Example:
-          ["stations", "search", "Boston", "--radius", "50"]
-
-    * `{:error, :invalid_arguments}`
-      When the arguments cannot be interpreted as a valid command.
-  """
-
-  def parse_argv(argv) do
-    OptionParser.parse(
-      argv,
-      switches: [help: :boolean],
-      aliases:  [h:    :help]
-    )
-    |> argv_to_internal()
-  end
-
-  defp argv_to_internal({opts, args, _}) do
-    if Keyword.get(opts, :help, false) do
-      :help
-    else
-      args_to_internal_representation(args)
-    end
-  end
-
-  defp args_to_internal_representation(["stations", "list"]) do
-    {:stations, :list}
-  end
-
-  defp args_to_internal_representation(["stations", "search" | rest]) do
-    parse_station_search(rest)
-  end
-
-  defp args_to_internal_representation([]) do
-    :help
-  end
-
-  defp args_to_internal_representation(codes) do
-    {:ok, Enum.map(codes, &String.upcase/1)}
-  end
-
-  defp parse_station_search([]), do: :help
-  defp parse_station_search([query | flags]) do
-    {opts, _, _} =
-      OptionParser.parse(
-        flags,
-        switches: [radius: :integer],
-        aliases: [r: :radius]
-      )
-    {:stations, {:search, query, normalize_search_opts(opts)}}
-  end
-
-  defp normalize_search_opts(opts) do
-    opts
-    |> Enum.map(fn
-      {:radius, r} -> {:radius_km, r}
-      other -> other
-    end)
-  end
-
 end
+

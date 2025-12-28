@@ -25,3 +25,6 @@ airports-*.tar
 
 # Ignore temporary swap files left by Vim
 *.swp
+
+# Raw data for cleaning
+/data/
