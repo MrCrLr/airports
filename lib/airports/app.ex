@@ -31,7 +31,7 @@ defmodule Airports.App do
          <- Cities.Search.search_candidates(query, min_population: 500),
          {:ok, city}     <- Cities.Selector.choose(cities),
          {:ok, ranked}   <- Stations.Search.within_radius(city, opts),
-         {:ok, picked}   <- Stations.Selection.choose(ranked),
+         {:ok, picked}   <- Stations.Selector.choose(ranked),
          {:ok, station}  <- normalize_station(picked) do
       Stations.Renderer.render([station])
     else

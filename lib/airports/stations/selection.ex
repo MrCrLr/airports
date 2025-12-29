@@ -1,4 +1,4 @@
-defmodule Airports.Stations.Selection do
+defmodule Airports.Stations.Selector do
   alias Airports.Stations.Station
 
   def choose([]), do: {:error, :no_results}
