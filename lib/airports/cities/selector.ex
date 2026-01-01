@@ -1,29 +1,19 @@
 defmodule Airports.Cities.Selector do
+  alias Airports.UI.ArrowMenu
+
   def choose([]), do: {:error, :no_city_matches}
 
   def choose(cities) do
-    IO.puts("Select a city:")
-
-    cities
-    |> Enum.with_index(1)
-    |> Enum.each(fn {c, i} ->
-      pop = if c.population, do: " (pop #{c.population})", else: ""
-      IO.puts("  #{i}. #{c.name}, #{c.admin1} #{c.country}#{pop}")
-    end)
-
-    prompt = "Enter number (1–#{length(cities)}) or press Enter to cancel: "
-    case IO.gets(prompt) |> to_string() |> String.trim() do
-      "" ->
-        {:error, :cancelled}
-
-      input ->
-        with {n, ""} <- Integer.parse(input),
-             true <- n >= 1 and n <= length(cities) do
-          {:ok, Enum.at(cities, n - 1)}
-        else
-          _ -> {:error, :invalid_selection}
-        end
-    end
+    items = Enum.map(cities, &format/1)
+    ArrowMenu.select("Select a city:", items)
   end
-end
 
+  defp format(city) do
+    label = "#{city.name}, #{city.admin1} #{city.country}#{pop_suffix(city)}"
+    {label, city}
+  end
+
+  defp pop_suffix(%{population: nil}), do: ""
+  defp pop_suffix(%{population: 0}), do: ""
+  defp pop_suffix(%{population: pop}) when is_integer(pop), do: " (pop #{pop})"
+end

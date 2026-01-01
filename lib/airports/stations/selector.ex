@@ -1,56 +1,18 @@
 defmodule Airports.Stations.Selector do
   alias Airports.Stations.Station
+  alias Airports.UI.ArrowMenu
 
   def choose([]), do: {:error, :no_results}
 
   def choose([{station, _distance}]), do: {:ok, station}
 
   def choose(results) do
-    render(results)
+    items = 
+      Enum.map(results, fn {station, distance} ->
+        {format(station, distance), station}
+      end)
 
-    case prompt(length(results)) do
-      {:ok, index} ->
-        {station, _} = Enum.at(results, index)
-        {:ok, station}
-
-      :cancelled ->
-        {:error, :cancelled}
-    end
-  end
-
-  defp render(results) do
-    IO.puts("\nSelect a station:\n")
-
-    results
-    |> Enum.with_index(1)
-    |> Enum.each(fn {{station, distance}, i} ->
-      IO.puts("  #{i}. #{format(station, distance)}")
-    end)
-  end
-
-  defp prompt(count) do
-    IO.write("\nEnter number (1–#{count}) or press Enter to cancel: ")
-
-    case IO.gets("") do
-      nil ->
-        :cancelled
-
-      "\n" ->
-        :cancelled
-
-      input ->
-        input
-        |> String.trim()
-        |> Integer.parse()
-        |> case do
-          {n, ""} when n >= 1 and n <= count ->
-            {:ok, n - 1}
-
-          _ ->
-            IO.puts("Invalid selection.")
-            :cancelled
-        end
-    end
+    ArrowMenu.select("Select a station:", items)
   end
 
   defp format(%Station{} = station, distance) do

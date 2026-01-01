@@ -32,7 +32,8 @@ defmodule Airports.MixProject do
 
   defp escript_config do
     [
-      main_module: Airports.CLI
+      main_module: Airports.CLI,
+      emu_args: "+Bd"
     ]
   end
 
