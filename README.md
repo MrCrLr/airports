@@ -53,13 +53,13 @@ Multiple codes:
 Search by a city/name query, then select a station from the interactive list. After you select, the CLI prints the forecast.
 
 ```bash
-./airports stations search Boston
+./airports search Boston
 ```
 
 With a larger radius (can produce long lists — paging supported):
 
 ```bash
-./airports stations search Dallas --radius 1000
+./airports search Dallas --radius 1000
 ```
 
 #### Selector controls (paging)
