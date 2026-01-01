@@ -20,8 +20,8 @@ defmodule Airports.Forecasts.RendererTest do
         Renderer.render([{:ok, forecast}])
       end)
 
-    assert output =~ "Airport: PAMR"
-    assert output =~ "Weather: Fair"
-    assert output =~ "-6.0 F"
+    assert output =~ "ICAO Code:   PAMR"
+    assert output =~ "Weather:     Fair"
+    assert output =~ "Temperature: -6.0 F (-21.1 C)"
   end
 end
