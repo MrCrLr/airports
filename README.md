@@ -7,15 +7,69 @@ This project focuses on:
 - explicit domain modeling with structs
 - clear separation between fetch, parse, and render layers
 
-## Usage
-
-Run the CLI with one or more ICAO airport codes:
+## Install / Build
 
 ```bash
-mix run -e 'Airports.CLI.run(["PAMR", "KJFK"])'
+mix deps.get
+mix escript.build
 ```
 
-Example output includes location, observation time, weather, temperature, wind, and visibility.
+This produces an executable named `./airports`.
+
+## Usage
+
+### Help
+
+```bash
+./airports --help
+# or
+./airports -h
+```
+
+### Fetch weather by ICAO code (default)
+
+Pass one or more ICAO codes (normalized to uppercase):
+
+```bash
+./airports pamr kjfk
+```
+
+Multiple codes:
+
+```bash
+./airports KJFK KLAX
+```
+
+### Stations
+
+#### List all stations
+
+```bash
+./airports list
+```
+
+#### Search stations by query (interactive selector)
+
+Search by a city/name query, then select a station from the interactive list. After you select, the CLI prints the forecast.
+
+```bash
+./airports stations search Boston
+```
+
+With a larger radius (can produce long lists — paging supported):
+
+```bash
+./airports stations search Dallas --radius 1000
+```
+
+#### Selector controls (paging)
+
+- **↑ / ↓** move
+- **PgUp / PgDn** page up/down (if your terminal sends these)
+- **space / b** page down/up (reliable fallback)
+- **g / G** top / bottom
+- **Enter** select
+- **q** cancel
 
 ## Architecture (high level)
 
@@ -23,13 +77,13 @@ Example output includes location, observation time, weather, temperature, wind, 
 CLI → Fetch (HTTP) → Parse (XML) → Forecast struct → Render
 ```
 
-- **Fetch**: Retrieves raw XML from NOAA
-- **Parser**: Converts XML into a `%Forecast{}` domain struct
-- **CLI / Renderer**: Renders forecasts for terminal output
+- **Fetch**: retrieves raw XML from NOAA  
+- **Parser**: converts XML into a domain struct  
+- **CLI / Renderer**: renders output for terminal display  
 
 ## Notes
 
 - Written as a learning project inspired by *Programming Elixir* (PragProg)
 - Uses Erlang’s `:xmerl` for XML parsing
-- Designed to be extended (tables, JSON output, concurrency, escript)
+- Currently a work-in-progress and planning to extend (improve UI, SQL database, tables, JSON output, concurrency, etc.)
 
