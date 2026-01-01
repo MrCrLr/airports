@@ -1,6 +1,6 @@
 defmodule Airports.Stations.Selector do
   alias Airports.Stations.Station
-  alias Airports.UI.ArrowMenu
+  alias Airports.UI.Menu
 
   def choose([]), do: {:error, :no_results}
 
@@ -12,7 +12,7 @@ defmodule Airports.Stations.Selector do
         {format(station, distance), station}
       end)
 
-    ArrowMenu.select("Select a station:", items)
+    Menu.select("Select a station:", items)
   end
 
   defp format(%Station{} = station, distance) do
