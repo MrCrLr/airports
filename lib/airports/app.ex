@@ -33,7 +33,7 @@ defmodule Airports.App do
          {:ok, ranked}   <- Stations.Search.within_radius(city, opts),
          {:ok, picked}   <- Stations.Selector.choose(ranked),
          {:ok, station}  <- normalize_station(picked) do
-      Stations.Renderer.render([station])
+      run([station.id])
     else
       [] -> IO.puts("No matching cities found.")
       {:error, :cancelled} -> :ok
