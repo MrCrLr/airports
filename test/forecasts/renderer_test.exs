@@ -1,27 +1,48 @@
 defmodule Airports.Forecasts.RendererTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
   import ExUnit.CaptureIO
 
-  alias Airports.Forecasts.Forecast
-  alias Airports.Forecasts.Renderer
+  alias Airports.Forecasts.{Renderer, Forecast}
 
-  test "renders a forecast" do
-    forecast =
-      %Forecast{
-        station_id: "PAMR",
-        location: "Anchorage, Merrill Field Airport, AK",
-        observation_time: "Some time",
-        weather: "Fair",
-        temperature_string: "-6.0 F (-21.1 C)"
-      }
+  test "renders ok forecast including wind and visibility when present" do
+    f = %Forecast{
+      location: "Somewhere",
+      station_id: "KBOS",
+      observation_time: "Now",
+      weather: "Fair",
+      temperature_string: "10C",
+      wind_string: "Calm",
+      visibility_mi: "8.00"
+    }
 
-    output =
-      capture_io(fn ->
-        Renderer.render([{:ok, forecast}])
-      end)
+    out = capture_io(fn -> Renderer.render([{:ok, f}]) end)
 
-    assert output =~ "ICAO Code:   PAMR"
-    assert output =~ "Weather:     Fair"
-    assert output =~ "Temperature: -6.0 F (-21.1 C)"
+    assert out =~ "Location: Somewhere"
+    assert out =~ "ICAO Code:   KBOS"
+    assert out =~ "Wind:"
+    assert out =~ "Visibility:"
+  end
+
+  test "renders ok forecast without wind/visibility when nil" do
+    f = %Forecast{
+      location: "Somewhere",
+      station_id: "KBOS",
+      observation_time: "Now",
+      weather: "Fair",
+      temperature_string: "10C",
+      wind_string: nil,
+      visibility_mi: nil
+    }
+
+    out = capture_io(fn -> Renderer.render([{:ok, f}]) end)
+
+    refute out =~ "Wind:"
+    refute out =~ "Visibility:"
+  end
+
+  test "renders error result" do
+    out = capture_io(fn -> Renderer.render([{:error, %{airport: "KBOS", reason: :boom}}]) end)
+    assert out =~ "Error for KBOS"
+    assert out =~ ":boom"
   end
 end

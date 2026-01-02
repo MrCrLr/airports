@@ -1,8 +1,10 @@
 defmodule Airports.Stations.Search do
   alias Airports.Stations.{Index, Proximity}
 
+  @index Application.compile_env(:airports, :stations_index, Index)
+
   def within_radius(anchor, opts \\ []) do
-    with {:ok, stations} <- Index.all() do
+    with {:ok, stations} <- @index.all() do
       ranked =
         anchor
         |> Proximity.expand(stations, opts)
@@ -11,6 +13,5 @@ defmodule Airports.Stations.Search do
       {:ok, ranked}
     end
   end
-
 end
 

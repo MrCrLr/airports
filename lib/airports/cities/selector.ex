@@ -1,11 +1,13 @@
 defmodule Airports.Cities.Selector do
   alias Airports.UI.Menu
 
+  @menu Application.compile_env(:airports, :menu, Menu)
+
   def choose([]), do: {:error, :no_city_matches}
 
   def choose(cities) do
     items = Enum.map(cities, &format/1)
-    Menu.select("Select a city:", items)
+    @menu.select("Select a city:", items)
   end
 
   defp format(city) do

@@ -27,5 +27,10 @@ defmodule Airports.Cities.SearchTest do
     cities = Search.search_candidates("Sprngfield", min_population: 500, limit: 5)
     assert length(cities) >= 1
   end
+
+  test "search_candidates falls back to 3-char prefix when full query misses" do
+    [first | _] = Search.search_candidates("New York Cityzzzz", min_population: 500, limit: 10)
+    assert first.name == "New York City"
+  end
 end
 

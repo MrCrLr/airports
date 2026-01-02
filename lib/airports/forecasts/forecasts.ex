@@ -16,7 +16,7 @@ defmodule Airports.Forecasts.Forecasts do
 
     airport
     |> forecast_url()
-    |> Req.get()
+    |> http().get([])
     |> handle_response(airport)
   end
 
@@ -44,4 +44,6 @@ defmodule Airports.Forecasts.Forecasts do
   defp forecast_url(airport) do
     "#{@noaa_url}/#{airport}.xml"
   end
+
+  defp http, do: Application.get_env(:airports, :http, Airports.Http.Req)
 end

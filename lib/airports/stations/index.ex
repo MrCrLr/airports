@@ -12,7 +12,7 @@ defmodule Airports.Stations.Index do
   end
 
   def fetch do
-    case Req.get(@index_url) do
+    case http().get(@index_url, []) do
       {:ok, %{status: 200, body: body}} ->
         {:ok, body}
 
@@ -23,4 +23,6 @@ defmodule Airports.Stations.Index do
         {:error, reason}
     end
   end
+
+  defp http, do: Application.get_env(:airports, :http, Airports.Http.Req)
 end

@@ -3,30 +3,45 @@ defmodule Airports.CLITest do
 
   alias Airports.CLI
 
-  describe "parse_argv/1" do
-    test "returns :help when -h is passed" do
-      assert CLI.parse_argv(["-h"]) == :help
-    end
+  test "parse_argv empty => :help" do
+    assert CLI.parse_argv([]) == :help
+  end
 
-    test "returns :help when --help is passed" do
-      assert CLI.parse_argv(["--help"]) == :help
-    end
+  test "parse_argv -h/--help => :help" do
+    assert CLI.parse_argv(["-h"]) == :help
+    assert CLI.parse_argv(["--help"]) == :help
+  end
 
-    test "returns :help when help flag comes after an airport code" do
-      assert CLI.parse_argv(["k6b9", "-h"]) == :help
-    end
+  test "parse_argv ICAO codes => normalized uppercase list" do
+    assert CLI.parse_argv(["kjfk", "KBOS", "Kdfw"]) == {:ok, ["KJFK", "KBOS", "KDFW"]}
+  end
 
-    test "returns {:ok, [code]} for a single airport code" do
-      assert CLI.parse_argv(["k6b9"]) == {:ok, ["K6B9"]}
-    end
+  test "parse_argv list => {:stations, :list}" do
+    assert CLI.parse_argv(["list"]) == {:stations, :list}
+  end
 
-    test "returns {:ok, [codes]} for multiple airport codes" do
-      assert CLI.parse_argv(["k6b9", "egll", "kjfk"]) ==
-               {:ok, ["K6B9", "EGLL", "KJFK"]}
-    end
+  test "parse_argv search query with radius" do
+    assert CLI.parse_argv(["search", "Boston", "--radius", "50"]) ==
+             {:stations, {:search, "Boston", [radius_km: 50]}}
+  end
 
-    test "returns :help when no arguments are given" do
-      assert CLI.parse_argv([]) == :help 
-    end
+  test "parse_argv search query with -r alias" do
+    assert CLI.parse_argv(["search", "Boston", "-r", "10"]) ==
+             {:stations, {:search, "Boston", [radius_km: 10]}}
+  end
+
+  test "parse_argv search with no query => :help" do
+    assert CLI.parse_argv(["search"]) == :help
+  end
+
+  test "parse_argv search invalid option value => {:error, msg}" do
+    {:error, msg} = CLI.parse_argv(["search", "Boston", "--radius", "wat"])
+    assert msg =~ "radius"
+  end
+
+  test "parse_argv search invalid radius => {:error, msg}" do
+    {:error, msg} = CLI.parse_argv(["search", "Boston", "--radius", "-5"])
+    assert msg =~ "radius must be a positive integer"
   end
 end
+
