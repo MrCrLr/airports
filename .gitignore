@@ -28,3 +28,6 @@ airports-*.tar
 
 # Raw data for cleaning
 /data/
+
+# Report data
+/reports/
