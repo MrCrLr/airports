@@ -1,8 +1,9 @@
 defmodule AirportsTest do
-  use ExUnit.Case
-  doctest Airports
+  use ExUnit.Case, async: true
 
-  test "greets the world" do
-    assert Airports.hello() == :world
+  test "Airports exposes main/1 as the public entrypoint" do
+    assert {:module, Airports} = Code.ensure_loaded(Airports)
+    assert function_exported?(Airports, :main, 1)
   end
 end
+

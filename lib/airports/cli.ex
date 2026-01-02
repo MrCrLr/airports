@@ -82,6 +82,16 @@ defmodule Airports.CLI do
 
     * `{:error, :invalid_arguments}`
       When the arguments cannot be interpreted as a valid command.
+
+    ## Examples
+        iex> Airports.CLI.parse_argv(["kjfk", "KBOS", "Kdfw"])
+        {:ok, ["KJFK", "KBOS", "KDFW"]}
+    
+        iex> Airports.CLI.parse_argv(["search", "Boston", "--radius", "50"])
+        {:stations, {:search, "Boston", [radius_km: 50]}}
+
+        iex> Airports.CLI.parse_argv([])
+        :help
   """
 
   def parse_argv([]), do: :help

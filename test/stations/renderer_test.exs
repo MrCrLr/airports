@@ -1,5 +1,6 @@
 defmodule Airports.Stations.RendererTest do
   use ExUnit.Case, async: true
+  import ExUnit.CaptureIO
 
   alias Airports.Stations.Station
   alias Airports.Stations.Renderer
@@ -9,6 +10,14 @@ defmodule Airports.Stations.RendererTest do
       %Station{id: "CYYC", name: "Calgary", state: "AB"}
     ]
 
-    assert :ok = Renderer.render(stations)
+    output =
+      capture_io(fn ->
+        assert :ok = Renderer.render(stations)
+      end)
+
+    # Optional: assert something meaningful about the output
+    assert output =~ "CYYC"
+    assert output =~ "Calgary"
   end
 end
+

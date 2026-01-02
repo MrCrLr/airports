@@ -24,15 +24,16 @@ defmodule Airports.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      { :req,     "~> 0.5.16" },
-      { :ex_doc,  "~> 0.34"   },
-      { :earmark, "~> 1.4.47" }
+      { :req,         "~> 0.5.16" },
+      { :ex_doc,      "~> 0.34"   },
+      { :earmark,     "~> 1.4.47" },
+      { :stream_data, "~> 1.2", only: :test }
     ]
   end
 
   defp escript_config do
     [
-      main_module: Airports.CLI,
+      main_module: Airports,
       emu_args: "+Bd"
     ]
   end
